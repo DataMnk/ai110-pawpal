@@ -107,7 +107,11 @@ class Scheduler:
             return None
 
         base = date.fromisoformat(task.due_date)
-        new_task = replace(task, due_date=(base + delta).isoformat())
+        new_task = replace(
+            task,
+            due_date=(base + delta).isoformat(),
+            is_complete=False,
+        )
         pet.add_task(new_task)
         return new_task
 

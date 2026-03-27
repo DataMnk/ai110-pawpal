@@ -56,3 +56,24 @@ PawPal+ includes algorithmic logic to make scheduling intelligent:
   tomorrow; weekly tasks reschedule 7 days out
 - **Smart filtering** — filter tasks by pet name 
   (case-insensitive) or completion status
+
+## Testing PawPal+
+
+Run the full test suite with:
+```bash
+python -m pytest tests/ -v
+```
+
+### What the tests cover
+- Task completion and pet task management
+- Chronological sorting with priority tie-breaking
+- Filtering by pet name (case-insensitive) and completion status
+- Recurring task rescheduling (daily, weekly, once, unknown)
+- Conflict detection (2 tasks, 3 tasks, same time)
+- Edge cases: empty owner, pet with no tasks, 
+  rescheduled task starts incomplete
+
+### Confidence Level: ⭐⭐⭐⭐ (4/5)
+The core scheduling behaviors are well verified including 
+edge cases. Remaining gaps: overlapping duration detection 
+and calendar boundary cases.

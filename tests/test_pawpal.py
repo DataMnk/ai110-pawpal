@@ -185,3 +185,111 @@ def test_detect_conflicts_flags_tasks_at_same_time():
     assert len(conflicts) == 2
     assert walk in conflicts and vet_dropoff in conflicts
     assert grooming not in conflicts
+
+
+def test_generate_schedule_two_pets_interleaved_times_chronological():
+    owner = Owner("Alex")
+    pet_a = Pet(name="Milo", age=3, breed="Beagle")
+    pet_b = Pet(name="Luna", age=2, breed="Tabby")
+    owner.add_pet(pet_a)
+    owner.add_pet(pet_b)
+    pet_a.add_task(_task("Milo mid", "12:00", pet_name="Milo"))
+    pet_a.add_task(_task("Milo late", "18:00", pet_name="Milo"))
+    pet_b.add_task(_task("Luna early", "08:00", pet_name="Luna"))
+    pet_b.add_task(_task("Luna afternoon", "15:00", pet_name="Luna"))
+
+    scheduler = Scheduler(owner)
+    ordered = scheduler.generate_schedule()
+
+    assert [t.time for t in ordered] == ["08:00", "12:00", "15:00", "18:00"]
+    assert [t.name for t in ordered] == ["Luna early", "Milo mid", "Luna afternoon", "Milo late"]
+
+
+def test_filter_tasks_complete_and_pending_after_marking_some_done():
+    owner = Owner("Alex")
+    pet = Pet(name="Milo", age=3, breed="Beagle")
+    owner.add_pet(pet)
+    t1 = _task("Walk", "07:00")
+    t2 = _task("Feed", "08:00")
+    t3 = _task("Meds", "20:00")
+    pet.add_task(t1)
+    pet.add_task(t2)
+    pet.add_task(t3)
+    t1.mark_complete()
+    t3.mark_complete()
+
+    scheduler = Scheduler(owner)
+    complete = scheduler.filter_tasks("complete")
+    pending = scheduler.filter_tasks("pending")
+
+    assert len(complete) == 2 and t1 in complete and t3 in complete
+    assert len(pending) == 1 and pending[0] is t2
+
+
+def test_owner_no_pets_get_all_tasks_and_generate_schedule_empty():
+    owner = Owner("Nobody")
+    scheduler = Scheduler(owner)
+
+    assert scheduler.get_all_tasks() == []
+    assert scheduler.generate_schedule() == []
+
+
+def test_pet_no_tasks_get_all_tasks_empty():
+    owner = Owner("Alex")
+    owner.add_pet(Pet(name="Solo", age=1, breed="Hamster"))
+
+    scheduler = Scheduler(owner)
+    assert scheduler.get_all_tasks() == []
+
+
+def test_reschedule_recurring_unknown_frequency_returns_none_without_adding():
+    pet = Pet(name="Milo", age=1, breed="Beagle")
+    owner = Owner("Sam", pets=[pet])
+    scheduler = Scheduler(owner)
+    task = Task(
+        name="Grooming",
+        duration=60,
+        time="11:00",
+        frequency="monthly",
+        priority="medium",
+        due_date="2026-03-27",
+        pet_name="Milo",
+    )
+    pet.add_task(task)
+
+    assert scheduler.reschedule_recurring(task, pet) is None
+    assert len(pet.tasks) == 1
+
+
+def test_reschedule_recurring_daily_new_task_is_not_complete():
+    pet = Pet(name="Milo", age=1, breed="Beagle")
+    owner = Owner("Sam", pets=[pet])
+    scheduler = Scheduler(owner)
+    task = Task(
+        name="Walk",
+        duration=30,
+        time="07:00",
+        frequency="daily",
+        priority="high",
+        due_date="2026-03-27",
+        pet_name="Milo",
+    )
+    pet.add_task(task)
+    task.mark_complete()
+
+    new_task = scheduler.reschedule_recurring(task, pet)
+
+    assert new_task is not None
+    assert new_task.is_complete is False
+
+
+def test_detect_conflicts_three_tasks_same_time_all_included():
+    a = _task("Task A", "09:00")
+    b = _task("Task B", "09:00")
+    c = _task("Task C", "09:00")
+
+    scheduler = Scheduler(Owner("Sam"))
+    conflicts = scheduler.detect_conflicts([a, b, c])
+
+    assert len(conflicts) == 3
+    assert a in conflicts and b in conflicts and c in conflicts
