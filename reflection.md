@@ -4,17 +4,33 @@
 
 **a. Initial design**
 
-Core user actions I identified:
-1. Add a pet with basic information (name, species, age)
-2. Add care tasks to a pet (walks, feeding, medications, vet appointments)
-3. View a generated daily schedule that organizes all tasks by priority and time
-- Briefly describe your initial UML design.
-- What classes did you include, and what responsibilities did you assign to each?
+Core user actions:
+1. Add a pet with basic information
+2. Add care tasks to a pet
+3. View a generated daily schedule
+
+This is my initial UML design:
+Classes:
+- Owner: holds the owner's name and list of pets. Responsible for adding pets.
+- Pet: holds pet details and a list of tasks. Responsible for adding tasks.
+- Task: represents a single care activity with time, duration, priority, and frequency.
+- Scheduler: the brain of the system. Retrieves, sorts, filters, and generates the daily schedule.
 
 **b. Design changes**
 
-- Did your design change during implementation?
-- If yes, describe at least one change and why you made it.
+After asking Cursor AI to review the class skeletons, two changes were made to Task:
+
+1. Added `due_date` (string "YYYY-MM-DD") — the original design had no way 
+   to know when a "once" or "weekly" task should run. Without this, the 
+   scheduler couldn't decide if a task belongs to today.
+
+2. Added `pet_name` (string) — when the Scheduler flattens all tasks from 
+   all pets into one list, tasks lost their pet identity. This field lets 
+   the schedule display "Feed Bella at 08:00" instead of just "Feed at 08:00".
+
+Suggestions rejected for now: changing `time` to datetime.time (too complex 
+for this stage), narrowing filter_tasks signature (deferred to Phase 4), 
+and changing detect_conflicts return type (deferred to Phase 4).
 
 ---
 

@@ -11,6 +11,8 @@ class Task:
     time: str  # "HH:MM"
     frequency: str  # daily/weekly/once
     priority: str  # low/medium/high
+    due_date: str  # "YYYY-MM-DD" for once/weekly tasks
+    pet_name: str
     is_complete: bool = False
 
     def mark_complete(self) -> None:
