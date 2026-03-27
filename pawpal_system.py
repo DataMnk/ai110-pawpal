@@ -1,7 +1,18 @@
 from __future__ import annotations
 
+from collections import Counter
 from dataclasses import dataclass, field
 from typing import List
+
+_COMPLETE_CRITERIA = frozenset({"complete", "completed", "done", "true", "yes"})
+_INCOMPLETE_CRITERIA = frozenset({"incomplete", "pending", "false", "no", "todo"})
+
+
+def _parse_time_key(time_str: str) -> tuple[int, int]:
+    parts = time_str.split(":")
+    hour = int(parts[0])
+    minute = int(parts[1]) if len(parts) > 1 else 0
+    return (hour, minute)
 
 
 @dataclass
@@ -16,7 +27,7 @@ class Task:
     is_complete: bool = False
 
     def mark_complete(self) -> None:
-        pass
+        self.is_complete = True
 
 
 @dataclass
@@ -28,7 +39,7 @@ class Pet:
     tasks: List[Task] = field(default_factory=list)
 
     def add_task(self, task: Task) -> None:
-        pass
+        self.tasks.append(task)
 
 
 class Owner:
@@ -37,7 +48,7 @@ class Owner:
         self.pets = pets if pets is not None else []
 
     def add_pet(self, pet: Pet) -> None:
-        pass
+        self.pets.append(pet)
 
 
 class Scheduler:
@@ -45,16 +56,27 @@ class Scheduler:
         self.owner = owner
 
     def get_all_tasks(self) -> List[Task]:
-        pass
+        all_tasks: List[Task] = []
+        for pet in self.owner.pets:
+            all_tasks.extend(pet.tasks)
+        return all_tasks
 
     def sort_by_time(self, tasks: List[Task]) -> List[Task]:
-        pass
+        return sorted(tasks, key=lambda t: _parse_time_key(t.time))
 
     def filter_tasks(self, criteria: str) -> List[Task]:
-        pass
+        tasks = self.get_all_tasks()
+        key = criteria.strip().lower()
+        if key in _COMPLETE_CRITERIA:
+            return [t for t in tasks if t.is_complete]
+        if key in _INCOMPLETE_CRITERIA:
+            return [t for t in tasks if not t.is_complete]
+        return [t for t in tasks if t.pet_name == criteria]
 
     def detect_conflicts(self, tasks: List[Task]) -> List[Task]:
-        pass
+        counts = Counter(t.time for t in tasks)
+        conflict_times = {time for time, n in counts.items() if n > 1}
+        return [t for t in tasks if t.time in conflict_times]
 
     def generate_schedule(self) -> List[Task]:
-        pass
+        return self.sort_by_time(self.get_all_tasks())
