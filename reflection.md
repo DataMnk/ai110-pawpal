@@ -4,6 +4,10 @@
 
 **a. Initial design**
 
+Core user actions I identified:
+1. Add a pet with basic information (name, species, age)
+2. Add care tasks to a pet (walks, feeding, medications, vet appointments)
+3. View a generated daily schedule that organizes all tasks by priority and time
 - Briefly describe your initial UML design.
 - What classes did you include, and what responsibilities did you assign to each?
 
