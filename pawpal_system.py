@@ -27,6 +27,7 @@ class Task:
     is_complete: bool = False
 
     def mark_complete(self) -> None:
+        """Mark this task as completed."""
         self.is_complete = True
 
 
@@ -39,32 +40,39 @@ class Pet:
     tasks: List[Task] = field(default_factory=list)
 
     def add_task(self, task: Task) -> None:
+        """Append a task to this pet's task list."""
         self.tasks.append(task)
 
 
 class Owner:
     def __init__(self, name: str, pets: List[Pet] | None = None) -> None:
+        """Initialize owner with a name and optional list of pets."""
         self.name = name
         self.pets = pets if pets is not None else []
 
     def add_pet(self, pet: Pet) -> None:
+        """Append a pet to this owner's pet list."""
         self.pets.append(pet)
 
 
 class Scheduler:
     def __init__(self, owner: Owner) -> None:
+        """Bind this scheduler to an owner whose pets' tasks it will manage."""
         self.owner = owner
 
     def get_all_tasks(self) -> List[Task]:
+        """Collect every task from all of the owner's pets."""
         all_tasks: List[Task] = []
         for pet in self.owner.pets:
             all_tasks.extend(pet.tasks)
         return all_tasks
 
     def sort_by_time(self, tasks: List[Task]) -> List[Task]:
+        """Return tasks ordered by scheduled time (hour and minute)."""
         return sorted(tasks, key=lambda t: _parse_time_key(t.time))
 
     def filter_tasks(self, criteria: str) -> List[Task]:
+        """Return tasks matching completion keywords or a pet name."""
         tasks = self.get_all_tasks()
         key = criteria.strip().lower()
         if key in _COMPLETE_CRITERIA:
@@ -74,9 +82,11 @@ class Scheduler:
         return [t for t in tasks if t.pet_name == criteria]
 
     def detect_conflicts(self, tasks: List[Task]) -> List[Task]:
+        """Return tasks whose time string appears more than once in the list."""
         counts = Counter(t.time for t in tasks)
         conflict_times = {time for time, n in counts.items() if n > 1}
         return [t for t in tasks if t.time in conflict_times]
 
     def generate_schedule(self) -> List[Task]:
+        """Return all tasks across pets, sorted by scheduled time."""
         return self.sort_by_time(self.get_all_tasks())

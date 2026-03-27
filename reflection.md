@@ -39,12 +39,30 @@ and changing detect_conflicts return type (deferred to Phase 4).
 **a. Constraints and priorities**
 
 - What constraints does your scheduler consider (for example: time, priority, preferences)?
+
+The scheduler considers these constraints:
+- Time: tasks are sorted by their "HH:MM" time attribute
+- Priority: stored per task (low/medium/high) for future use
+- Completion status: filter_tasks() can separate done vs pending tasks
+- Pet identity: each task knows which pet it belongs to via pet_name
+
 - How did you decide which constraints mattered most?
+Time was prioritized first because a daily schedule is 
+fundamentally time-ordered. Priority will be used in 
+Phase 4 for smarter sorting.
 
 **b. Tradeoffs**
 
 - Describe one tradeoff your scheduler makes.
 - Why is that tradeoff reasonable for this scenario?
+
+
+The conflict detector only flags tasks with the exact same 
+start time — it does not check for overlapping durations. 
+For example, a 30-minute task at 08:00 and a 10-minute task 
+at 08:15 would not be flagged as a conflict even though they 
+overlap. This is reasonable for a first version because it 
+keeps the logic simple and readable.
 
 ---
 
