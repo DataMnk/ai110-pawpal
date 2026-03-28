@@ -177,6 +177,48 @@ def test_reschedule_recurring_weekly_adds_copy_seven_days_out():
     assert new_task.due_date == "2026-04-03"
 
 
+def test_find_next_available_slot_empty_calendar_returns_start_time():
+    owner = Owner("Alex")
+    owner.add_pet(Pet(name="Milo", age=2, breed="Beagle"))
+    scheduler = Scheduler(owner)
+
+    assert scheduler.find_next_available_slot(30, "09:00") == "09:00"
+
+
+def test_find_next_available_slot_steps_past_overlap():
+    owner = Owner("Alex")
+    pet = Pet(name="Milo", age=2, breed="Beagle")
+    owner.add_pet(pet)
+    pet.add_task(_task("Block", "09:00", duration=45))
+    scheduler = Scheduler(owner)
+
+    assert scheduler.find_next_available_slot(30, "09:00", step=15) == "09:45"
+
+
+def test_find_next_available_slot_returns_none_after_end_of_day():
+    owner = Owner("Alex")
+    pet = Pet(name="Milo", age=2, breed="Beagle")
+    owner.add_pet(pet)
+    pet.add_task(_task("All day", "00:00", duration=24 * 60))
+    scheduler = Scheduler(owner)
+
+    assert scheduler.find_next_available_slot(15, "08:00", step=15) is None
+
+
+def test_find_next_available_slot_exclude_ignores_that_task():
+    owner = Owner("Alex")
+    pet = Pet(name="Milo", age=2, breed="Beagle")
+    owner.add_pet(pet)
+    move_me = _task("Move me", "09:00", duration=30)
+    pet.add_task(move_me)
+    scheduler = Scheduler(owner)
+
+    assert (
+        scheduler.find_next_available_slot(30, "09:00", exclude_tasks=[move_me])
+        == "09:00"
+    )
+
+
 def test_detect_conflicts_flags_tasks_at_same_time():
     walk = _task("Neighborhood walk", "09:00")
     vet_dropoff = _task("Vet appointment drop-off", "09:00")

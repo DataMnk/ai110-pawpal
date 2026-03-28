@@ -20,6 +20,20 @@ def _parse_time_key(time_str: str) -> tuple[int, int]:
     return (hour, minute)
 
 
+def _total_minutes_from_hhmm(time_str: str) -> int:
+    h, m = _parse_time_key(time_str)
+    return h * 60 + m
+
+
+def _hhmm_from_total_minutes(total: int) -> str:
+    return f"{total // 60:02d}:{total % 60:02d}"
+
+
+def _intervals_overlap(a_start: int, a_end: int, b_start: int, b_end: int) -> bool:
+    """True if [a_start, a_end) and [b_start, b_end) intersect."""
+    return not (a_end <= b_start or a_start >= b_end)
+
+
 def _priority_rank(priority: str) -> int:
     return _PRIORITY_RANK.get(priority.strip().lower(), 99)
 
@@ -191,6 +205,42 @@ class Scheduler:
         counts = Counter(t.time for t in tasks)
         conflict_times = {time for time, n in counts.items() if n > 1}
         return [t for t in tasks if t.time in conflict_times]
+
+    def _task_blocks_interval(self, task: Task, cand_start: int, cand_end: int) -> bool:
+        t0 = _total_minutes_from_hhmm(task.time)
+        t1 = t0 + int(task.duration)
+        return _intervals_overlap(cand_start, cand_end, t0, t1)
+
+    def find_next_available_slot(
+        self,
+        duration: int,
+        start_time: str,
+        step: int = 15,
+        *,
+        exclude_tasks: Optional[List[Task]] = None,
+    ) -> Optional[str]:
+        """Return the next start time (\"HH:MM\") with no overlapping tasks, or None.
+
+        Tries ``start_time`` first, then advances by ``step`` minutes until after
+        23:59. A slot [start, start + duration) must not overlap any existing
+        task interval. Pass ``exclude_tasks`` when the slot is for a task already
+        on the schedule (e.g. suggesting a move for a conflicting task).
+        """
+        excluded_ids = {id(t) for t in (exclude_tasks or [])}
+        blockers = [t for t in self.get_all_tasks() if id(t) not in excluded_ids]
+        dur = int(duration)
+        cur = _total_minutes_from_hhmm(start_time)
+        last_start = 23 * 60 + 59
+
+        while cur <= last_start:
+            cand_end = cur + dur
+            if not any(
+                self._task_blocks_interval(t, cur, cand_end) for t in blockers
+            ):
+                return _hhmm_from_total_minutes(cur)
+            cur += int(step)
+
+        return None
 
     def generate_schedule(self) -> List[Task]:
         """Return all tasks across pets, sorted by scheduled time."""

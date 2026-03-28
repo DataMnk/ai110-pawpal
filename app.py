@@ -450,6 +450,14 @@ if st.session_state.schedule_generated:
                 f"**Time conflict at {slot}:** {len(group)} task(s) share this time. {detail} "
                 "Consider staggering times so care blocks do not overlap."
             )
+            for t in group:
+                suggested = scheduler.find_next_available_slot(
+                    t.duration, t.time, exclude_tasks=[t]
+                )
+                if suggested:
+                    st.info(
+                        f"💡 Suggested free slot for **{t.name}** ({t.pet_name}): {suggested}"
+                    )
 
     if not scheduled:
         st.info("No tasks to schedule. Add tasks to your pets first.")
