@@ -1,8 +1,10 @@
-# PawPal+ (Module 2 Project)
+# 🐾 PawPal+
 
-You are building **PawPal+**, a Streamlit app that helps a pet owner plan care tasks for their pet.
+**PawPal+** is a smart pet care scheduling app built with Python and Streamlit. It helps busy pet owners stay consistent with their pets' daily routines by organizing care tasks, detecting scheduling conflicts, and generating a prioritized daily plan.
 
-## Scenario
+---
+
+## 📋 Scenario
 
 A busy pet owner needs help staying consistent with pet care. They want an assistant that can:
 
@@ -10,70 +12,81 @@ A busy pet owner needs help staying consistent with pet care. They want an assis
 - Consider constraints (time available, priority, owner preferences)
 - Produce a daily plan and explain why it chose that plan
 
-Your job is to design the system first (UML), then implement the logic in Python, then connect it to the Streamlit UI.
+---
 
-## What you will build
+## ✨ Features
 
-Your final app should:
+- **Time-based sorting** — Tasks are ordered chronologically by their scheduled `HH:MM` time, so your day reads top to bottom in the right order.
+- **Priority tie-breaking** — When two tasks share the same start time, high priority tasks appear first (high → medium → low).
+- **Conflict warnings** — The scheduler flags any tasks scheduled at the exact same time and shows a warning with pet name, task name, and a suggestion to stagger care.
+- **Daily and weekly recurrence** — Daily tasks auto-reschedule for tomorrow; weekly tasks reschedule 7 days out. Once tasks do not recur. Rescheduled tasks always start incomplete.
+- **Smart filtering** — Filter tasks by pet name (case-insensitive) or completion status (pending/completed), or combine both filters. Results stay sorted by time.
 
-- Let a user enter basic owner + pet info
-- Let a user add/edit tasks (duration + priority at minimum)
-- Generate a daily schedule/plan based on constraints and priorities
-- Display the plan clearly (and ideally explain the reasoning)
-- Include tests for the most important scheduling behaviors
+---
 
-## Getting started
+## 🏗️ System Architecture
+
+The app follows a clean backend/frontend separation:
+
+```
+pawpal_system.py  →  the backend (Owner, Pet, Task, Scheduler classes)
+app.py            →  the Streamlit UI (connects to backend via imports)
+main.py           →  CLI demo script (for terminal testing)
+tests/            →  automated pytest suite
+```
+
+Four core classes:
+- **Owner** — holds a name and a list of Pets
+- **Pet** — holds pet details and a list of Tasks
+- **Task** — represents a single care activity (time, duration, priority, frequency)
+- **Scheduler** — the brain: sorts, filters, detects conflicts, and generates the daily plan
+
+See `uml_final.png` for the full class diagram.
+
+---
+
+## 🚀 Getting Started
 
 ### Setup
 
 ```bash
 python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
+.venv\Scripts\activate       # Windows
 pip install -r requirements.txt
 ```
 
-### Suggested workflow
+### Run the app
 
-1. Read the scenario carefully and identify requirements and edge cases.
-2. Draft a UML diagram (classes, attributes, methods, relationships).
-3. Convert UML into Python class stubs (no logic yet).
-4. Implement scheduling logic in small increments.
-5. Add tests to verify key behaviors.
-6. Connect your logic to the Streamlit UI in `app.py`.
-7. Refine UML so it matches what you actually built.
+```bash
+streamlit run app.py
+```
 
-## Smarter Scheduling
+### Run the CLI demo
 
-PawPal+ includes algorithmic logic to make scheduling intelligent:
+```bash
+python main.py
+```
 
-- **Time-based sorting** — tasks are ordered chronologically 
-  by their scheduled time (HH:MM)
-- **Priority tie-breaking** — when two tasks share the same 
-  time, high priority tasks appear first
-- **Conflict detection** — the scheduler flags any tasks 
-  scheduled at the same time and warns the user
-- **Recurring tasks** — daily tasks auto-reschedule for 
-  tomorrow; weekly tasks reschedule 7 days out
-- **Smart filtering** — filter tasks by pet name 
-  (case-insensitive) or completion status
+---
 
-## Testing PawPal+
+## 🧪 Testing PawPal+
 
-Run the full test suite with:
 ```bash
 python -m pytest tests/ -v
 ```
 
-### What the tests cover
+The test suite covers 16 behaviors including:
 - Task completion and pet task management
 - Chronological sorting with priority tie-breaking
-- Filtering by pet name (case-insensitive) and completion status
-- Recurring task rescheduling (daily, weekly, once, unknown)
-- Conflict detection (2 tasks, 3 tasks, same time)
-- Edge cases: empty owner, pet with no tasks, 
-  rescheduled task starts incomplete
+- Filtering by pet name and completion status
+- Recurring task rescheduling (daily, weekly, once, unknown frequency)
+- Conflict detection (2 tasks, 3 tasks at same time)
+- Edge cases: empty owner, pet with no tasks, rescheduled task starts incomplete
 
-### Confidence Level: ⭐⭐⭐⭐ (4/5)
-The core scheduling behaviors are well verified including 
-edge cases. Remaining gaps: overlapping duration detection 
-and calendar boundary cases.
+---
+
+## 📸 Demo
+
+<a href="demo_screenshot.png" target="_blank">
+<img src='demo_screenshot.png' title='PawPal+ App' width='600' alt='PawPal App'/>
+</a>
