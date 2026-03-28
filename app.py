@@ -7,6 +7,273 @@ from pawpal_system import Owner, Pet, Scheduler, Task
 
 st.set_page_config(page_title="PawPal+", page_icon="🐾", layout="centered")
 
+
+def _inject_pawpal_theme() -> None:
+    st.markdown(
+        """
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+
+:root {
+  --pp-purple-deep: #6b5b95;
+  --pp-purple-soft: #9b8fc9;
+  --pp-purple-mist: #e8e2f4;
+  --pp-green: #6bae7d;
+  --pp-green-deep: #4a9d63;
+  --pp-green-mist: #e6f4ea;
+  --pp-warm-white: #fffbf7;
+  --pp-cream: #fff5ef;
+  --pp-card: #fffcfa;
+  --pp-text: #3d3550;
+  --pp-muted: #6b6378;
+  --pp-accent-warm: #d4a574;
+  --pp-shadow: rgba(107, 91, 149, 0.12);
+}
+
+html, body, .stApp {
+  font-family: "Nunito", sans-serif !important;
+  color: var(--pp-text);
+}
+
+.stApp {
+  background: linear-gradient(180deg, var(--pp-purple-mist) 0%, var(--pp-warm-white) 45%, var(--pp-green-mist) 100%) !important;
+}
+
+section[data-testid="stMain"] > div {
+  background: transparent !important;
+}
+
+.main .block-container {
+  padding-top: 1.25rem;
+  padding-bottom: 2.5rem;
+  max-width: 46rem;
+  background: rgba(255, 252, 250, 0.88);
+  backdrop-filter: blur(10px);
+  border-radius: 24px;
+  box-shadow: 0 8px 40px var(--pp-shadow);
+  border: 1px solid rgba(155, 143, 201, 0.22);
+}
+
+.pp-hero {
+  text-align: center;
+  padding: 1.75rem 1.5rem 2rem;
+  margin: -1rem -1rem 1.5rem -1rem;
+  border-radius: 0 0 24px 24px;
+  background: linear-gradient(135deg, var(--pp-purple-deep) 0%, var(--pp-purple-soft) 42%, var(--pp-green) 100%);
+  box-shadow: 0 12px 40px var(--pp-shadow);
+}
+.pp-hero-title {
+  font-family: "Nunito", sans-serif !important;
+  font-weight: 800 !important;
+  font-size: 2.35rem !important;
+  letter-spacing: -0.02em;
+  margin: 0 !important;
+  color: #fffef9 !important;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.15);
+}
+
+div[data-testid="stMarkdownContainer"] h2 {
+  font-family: "Nunito", sans-serif !important;
+  font-weight: 700 !important;
+  color: var(--pp-purple-deep) !important;
+  margin-top: 1.35rem !important;
+  padding: 0.65rem 1rem !important;
+  background: var(--pp-card) !important;
+  border-radius: 14px !important;
+  border-left: 4px solid var(--pp-green) !important;
+  box-shadow: 0 4px 20px var(--pp-shadow) !important;
+}
+
+div[data-testid="stMarkdownContainer"] h3 {
+  font-family: "Nunito", sans-serif !important;
+  color: var(--pp-purple-deep) !important;
+}
+
+.stDivider {
+  margin-top: 1.5rem !important;
+  margin-bottom: 1.5rem !important;
+  background: linear-gradient(90deg, transparent, var(--pp-purple-soft), transparent) !important;
+  height: 2px !important;
+  border: none !important;
+}
+
+.stApp, .main, .block-container {
+  color-scheme: light !important;
+}
+
+.stTextInput label, .stNumberInput label, .stSelectbox label, .stDateInput label {
+  font-family: "Nunito", sans-serif !important;
+  font-weight: 600 !important;
+  color: var(--pp-muted) !important;
+}
+
+/* Text, number, date — input + BaseWeb wrappers (dark theme often styles inner divs) */
+.stTextInput input,
+[data-testid="stTextInput"] input,
+.stNumberInput input,
+[data-testid="stNumberInput"] input,
+.stDateInput input,
+[data-testid="stDateInput"] input {
+  background-color: var(--pp-card) !important;
+  background: var(--pp-card) !important;
+  color: var(--pp-text) !important;
+  caret-color: var(--pp-text) !important;
+  -webkit-text-fill-color: var(--pp-text) !important;
+  border-radius: 12px !important;
+  border: 1.5px solid var(--pp-purple-mist) !important;
+  font-family: "Nunito", sans-serif !important;
+}
+.stTextInput input::placeholder,
+.stNumberInput input::placeholder,
+.stDateInput input::placeholder {
+  color: var(--pp-muted) !important;
+  opacity: 1 !important;
+}
+.stTextInput input:focus, .stNumberInput input:focus, .stDateInput input:focus,
+[data-testid="stTextInput"] input:focus,
+[data-testid="stNumberInput"] input:focus,
+[data-testid="stDateInput"] input:focus {
+  border-color: var(--pp-green) !important;
+  box-shadow: 0 0 0 2px var(--pp-green-mist) !important;
+}
+
+.stTextInput [data-baseweb="input"],
+.stNumberInput [data-baseweb="input"],
+.stDateInput [data-baseweb="input"] {
+  background-color: var(--pp-card) !important;
+  border-radius: 12px !important;
+}
+.stTextInput [data-baseweb="input"] > div,
+.stNumberInput [data-baseweb="input"] > div,
+.stDateInput [data-baseweb="input"] > div {
+  background-color: var(--pp-card) !important;
+  color: var(--pp-text) !important;
+}
+
+.stNumberInput button {
+  background-color: var(--pp-cream) !important;
+  color: var(--pp-purple-deep) !important;
+  border: 1.5px solid var(--pp-purple-mist) !important;
+}
+.stNumberInput button:hover {
+  background-color: var(--pp-purple-mist) !important;
+  color: var(--pp-purple-deep) !important;
+}
+
+/* Selectbox — closed control + value text */
+.stSelectbox [data-baseweb="select"],
+div[data-baseweb="select"] {
+  background-color: var(--pp-card) !important;
+}
+.stSelectbox [data-baseweb="select"] > div,
+div[data-baseweb="select"] > div {
+  background-color: var(--pp-card) !important;
+  color: var(--pp-text) !important;
+  border-radius: 12px !important;
+  border-color: var(--pp-purple-mist) !important;
+}
+.stSelectbox [data-baseweb="select"] * {
+  color: var(--pp-text) !important;
+}
+.stSelectbox svg {
+  fill: var(--pp-purple-deep) !important;
+}
+
+/* BaseWeb menus / date calendar (portaled; keep lists readable on cream) */
+div[data-baseweb="popover"] [data-baseweb="menu"],
+div[data-baseweb="popover"] ul {
+  background-color: var(--pp-card) !important;
+  border-radius: 12px !important;
+  border: 1px solid var(--pp-purple-mist) !important;
+}
+div[data-baseweb="popover"] li,
+div[data-baseweb="menu"] li {
+  background-color: var(--pp-card) !important;
+  color: var(--pp-text) !important;
+}
+div[data-baseweb="popover"] li:hover,
+div[data-baseweb="menu"] li:hover {
+  background-color: var(--pp-purple-mist) !important;
+}
+
+[data-baseweb="calendar"],
+[data-baseweb="calendar"] table,
+[data-baseweb="calendar"] th,
+[data-baseweb="calendar"] td {
+  background-color: var(--pp-card) !important;
+  color: var(--pp-text) !important;
+}
+
+.stButton > button {
+  font-family: "Nunito", sans-serif !important;
+  font-weight: 700 !important;
+  border-radius: 14px !important;
+  padding: 0.5rem 1.25rem !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+}
+.stButton > button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px var(--pp-shadow) !important;
+}
+
+.stButton > button[kind="primary"],
+.stButton > button[data-testid="baseButton-primary"] {
+  background: linear-gradient(135deg, var(--pp-accent-warm) 0%, #c9956a 100%) !important;
+  color: #fffef9 !important;
+  border: none !important;
+}
+.stButton > button[kind="primary"]:hover,
+.stButton > button[data-testid="baseButton-primary"]:hover {
+  background: linear-gradient(135deg, #ddb882 0%, var(--pp-accent-warm) 100%) !important;
+  color: #fffef9 !important;
+}
+
+.stButton > button[kind="secondary"],
+.stButton > button[data-testid="baseButton-secondary"] {
+  background: var(--pp-card) !important;
+  color: var(--pp-purple-deep) !important;
+  border: 2px solid var(--pp-purple-soft) !important;
+}
+.stButton > button[kind="secondary"]:hover,
+.stButton > button[data-testid="baseButton-secondary"]:hover {
+  background: var(--pp-purple-mist) !important;
+  border-color: var(--pp-purple-deep) !important;
+  color: var(--pp-purple-deep) !important;
+}
+
+div[data-testid="stDataFrame"],
+[data-testid="stDataFrame"] {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  box-shadow: 0 6px 28px var(--pp-shadow) !important;
+  border: 1px solid var(--pp-purple-mist) !important;
+}
+
+.stAlert, [data-testid="stNotification"] {
+  border-radius: 14px !important;
+  font-family: "Nunito", sans-serif !important;
+}
+
+.stCaption, .stMarkdown p, .stMarkdown li {
+  font-family: "Nunito", sans-serif !important;
+}
+</style>
+""",
+        unsafe_allow_html=True,
+    )
+
+
+def _priority_display(priority: str) -> str:
+    key = (priority or "").strip().lower()
+    return {
+        "high": "🔴 High",
+        "medium": "🟡 Medium",
+        "low": "🟢 Low",
+    }.get(key, priority)
+
+
+_inject_pawpal_theme()
+
 if "owner" not in st.session_state:
     st.session_state.owner = None
 if "schedule_generated" not in st.session_state:
@@ -19,7 +286,10 @@ def _time_sort_key(time_str: str) -> tuple[int, int]:
     minute = int(parts[1]) if len(parts) > 1 else 0
     return (hour, minute)
 
-st.title("🐾 PawPal+")
+st.markdown(
+    '<div class="pp-hero"><h1 class="pp-hero-title">🐾 PawPal+</h1></div>',
+    unsafe_allow_html=True,
+)
 
 # --- Owner ---
 st.subheader("Owner")
@@ -158,7 +428,7 @@ if st.session_state.schedule_generated:
                     "Task": t.name,
                     "Pet": t.pet_name,
                     "Duration (min)": t.duration,
-                    "Priority": t.priority,
+                    "Priority": _priority_display(t.priority),
                     "Frequency": t.frequency,
                     "Due": t.due_date,
                 }
@@ -208,7 +478,7 @@ if st.session_state.schedule_generated:
                             "Task": t.name,
                             "Pet": t.pet_name,
                             "Duration (min)": t.duration,
-                            "Priority": t.priority,
+                            "Priority": _priority_display(t.priority),
                             "Frequency": t.frequency,
                             "Due": t.due_date,
                         }
